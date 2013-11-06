@@ -1,3 +1,6 @@
+# Article extends Post model, adding author, site name, and guid fields. Used to store external sourced posts.
+
+
 class Article < Post
   field :author, :type => String
   field :site_name, :type => String
@@ -5,6 +8,16 @@ class Article < Post
 
   validates :site_name, :presence => true
   validates :guid, :presence => true
+
+  ##
+  # Deliver weekly digest
+  # Usage: In Rails Console, Article.deliver_weekly_digest
+  ##
+  def self.deliver_weekly_digest
+    User.where(:digest_frequency => "Weekly").each do | u |
+      UserMailer.deliver_weekly_email(u)
+    end
+  end
 
   ##
   # Get articles from predefined RSS feeds.
@@ -20,6 +33,7 @@ class Article < Post
   # Usage: In Rails Console, Article.update_from_feeds("http://blog.8thlight.com/feed/atom.xml")
   ##
   def self.update_from_feeds(feed_urls)
+    @user = User.find(:first, :conditions => { :slug => ENV['ARTICLE_USER_ID'] })
     @articles = {}
     feeds = Feedzirra::Feed.fetch_and_parse(feed_urls)
     feeds.each do |feed_url, feed|
@@ -27,7 +41,6 @@ class Article < Post
     end
 
     if !@articles.empty?
-      @user = User.find(:first, :conditions => { :_id => ENV['ARTICLE_USER_ID'] })
       UserMailer.deliver_article_email(@user, @articles)
     end
   end
@@ -51,7 +64,6 @@ class Article < Post
   def self.add_entries(entries, title)
     entries.each do |entry|
       if self.unscoped.where(guid: entry.id).empty?
-        #puts(entry.id)
         art = create!(
             :title          => entry.title,
             :source_url     => entry.url,
@@ -60,10 +72,8 @@ class Article < Post
             :author         => entry.author,
             :content        => entry.content.blank? ? entry.title : entry.content,
             :site_name      => title,
-            :user_id        => ENV['ARTICLE_USER_ID']
+            :user_id        => @user.id
         )
-        #art.tempTags = "article"
-        #art.setTags
         @articles[art.source_url] = art.title + "##"  + art.content.truncate(350) + "##" + art.slug
       end
     end

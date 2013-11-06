@@ -11,6 +11,15 @@ namespace :hibiscus do
     puts "get_articles_from_rss finished."
   end
 
+  desc "Delivery weekly digeset"
+  task(:deliver_weekly_digest => :environment) do
+    if Date.today.wday == 2 # run on Tuesdays
+      puts "deliver_weekly_digest started..."
+      Article.deliver_weekly_digest
+      puts "deliver_weekly_digest finished."
+    end
+  end
+
   desc "hello world"
   task(:hello_world => :environment) do
     puts "hello world"

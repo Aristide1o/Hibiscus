@@ -1,4 +1,27 @@
-<%= link_to "New #{@type}", new_polymorphic_path(@type.constantize) %>
+<% if @posts.first.is_a?(Kata) %>
+  <% header = GlobalConfig.activity_page_header || GlobalConfig.activity_name.pluralize  %>
+<% else %>
+  <% header = "Articles on Software Craftsmanship" %>
+<% end %>
+<%= content_for :page_header, header %>
+
+
+  <% if @type != "Article" %>
+    <table style="width:100%;">
+      <tr>
+        <td style="width:50%;" align="left">
+          <div class="newType" ><%= link_to "New #{@type}", new_polymorphic_path(@type.constantize) %></div>
+        </td>
+        <td style="width:50%;"  align="right">
+          <% if @type == "Kata" %>
+            <div class="newType randomKata"><%= link_to "Challenge me!", random_kata_path() %></div>
+          <% end %>
+        </td>
+      </tr>
+    </table>
+
+  <% end %>
+
 
 <script type="text/javascript">
 
@@ -15,14 +38,16 @@
         $('.main-category-div').css('opacity', 0).each(function (i) {
           var height = $('#main-all-posts-div').height();
 
-          $('#main-all-posts-div').animate({ height:height + 75}, 500);
+          $('#main-all-posts-div').animate({ height:height + 75}, 100);
           $('#main-all-posts-div').height("+=70");
           $(this).css('display', 'block');
-          $(this).animate({ opacity:0 }, i * 500);
-          $(this).animate({ opacity:1}, 1000);
+          $(this).animate({ opacity:0 }, 0);
+          $(this).animate({ opacity:1}, 0);
         });
     });
 </script>
+
+
 
 <div id="main-all-posts-div">
   <% @posts.desc(:created_at).limit(15).each do |post| %>
@@ -33,52 +58,44 @@
       <% end %>
   <% end %>
 
-  <% if @posts.first.is_a?(Kata) %>
+  <% if @type == "Kata" %>
       <table width='100%'>
         <% @cat_count = @categories.count %>
         <% @row_count = (@categories.count / 3.0).ceil %>
-        <% @row_num = 0 %>
-        <% while @row_num < @row_count %>
+
+        <% (0..(@row_count-1)).each do |n| %>
             <tr>
               <% (1..3).each do |s| %>
                   <td width="33%">
                     <div class="main-category-div" style="display: none; margin: 5px;padding: 10px;">
-                      <% if ((@row_num * 3) + s - 1) < @cat_count %>
-                          <h2 class="entry-title" style="margin-bottom: 5px;"><%= @categories.at((@row_num * 3) + s - 1).name.capitalize %></h2>
-                          <table width='100%'>
-                            <% @categories.at((@row_num * 3) + s - 1).katas.desc(:rating).each do |kata| %>
-                                <tr>
-                                  <td width='70%' style="font-size: 14px;">
-                                    <%= link_to kata.title, kata, {:style => 'color:#3399CC; text-decoration: none'} %>
-                                  </td>
-                                  <td width='30%'>
-                                    <% if kata.rating > 0 %>
-                                        <% for x in 1..kata.rating.ceil %>
-                                            <img src="/images/star_unit.gif" style="height: 14px; width: 14px">
-                                        <% end %>
-                                    <% end %>
-                                  </td>
-                                </tr>
-                            <% end %>
-                          </table>
+
+                      <% if ((n * 3) + s - 1) < @cat_count %>
+                          <%= render partial: "posts/kata_homepage_box_short", locals: {n: n, s: s} %>
                       <% else %>
                           &nbsp;
                       <% end %>
+
                     </div>
                   </td>
               <% end %>
             </tr>
-            <% @row_num += 1 %>
         <% end %>
+
       </table>
   <% end %>
+
 </div>
+
+<% if @type != "Article" %>
 
 <div id="second_new_post_link">
 
-  <% if @posts.length > 0 %>                    <br><br>
-      <%= link_to "New #{@type}", new_polymorphic_path(@type.constantize) %>
-  <% end %>
+  <% if @posts.length >= 4 %>
+    <div class="newType">
+    <%= link_to "New #{@type}", new_polymorphic_path(@type.constantize) %>
+    </div>
+	<% end %>
+<% end %>
 
   <br/><br/>
 

@@ -21,13 +21,30 @@ describe Kata do
       @kata.should be_invalid
     end
 
-    it "is invalid without a category" do
-      @kata.category = nil
+    it "is invalid without at least one category" do
+      @kata.category_ids = nil
       @kata.should be_invalid
     end
 
     it "is valid without a user defined category" do
       @kata.user_categories = nil
+      @kata.should be_valid
+    end
+
+  end
+
+  describe "Optional fields: " do
+    it "is valid without a source_url" do
+      @kata.should be_valid
+    end
+
+    it "is invalid with a non-url source_url" do
+      @kata.source_url = "Todd Sedano"
+      @kata.should be_invalid
+    end
+
+    it "is valid with a url-format source_url" do
+      @kata.source_url = "http://craftsmanship.sv.cmu.edu/"
       @kata.should be_valid
     end
 

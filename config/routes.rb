@@ -1,27 +1,5 @@
 CraftWiki::Application.routes.draw do
   get "categories/index"
-  #get "categories/show"
-  #get "categories/new"
-  #get "categories/edit"
-  #get "categories/create"
-  #get "categories/update"
-  #get "categories/destroy"
-
-  devise_for :users do
-    match 'users/sign_in', :to => "devise/sessions#new"
-    #match 'users/:id', :to => 'users#show'
-    match 'logout', :to => 'devise/sessions#destroy', :as => :logout
-  end
-
-  resources :users do
-    resources :plans
-  end
-
-  resources :search, :only => [:index]
-  resources :achievements
-  resources :authentications
-  resources :likes
-  resources :tags
 
   match '/posts/mars-rover-kata' => redirect('/exercises/mars-rover-kata')
   match '/posts/unbeatable-tic-dash-tac-dash-toe' => redirect('/exercises/unbeatable-tic-dash-tac-dash-toe')
@@ -36,22 +14,65 @@ CraftWiki::Application.routes.draw do
   match '/posts/mars-rover-kata' => redirect('/exercises/mars-rover-kata')
   match '/posts/gilded-rose-kata' => redirect('/exercises/gilded-rose-kata')
 
-  resources :posts do
-    resources :comments
+  devise_for :users do
+    match 'users/sign_in', :to => "devise/sessions#new"
+    #match 'users/:id', :to => 'users#show'
+    match 'logout', :to => 'devise/sessions#destroy', :as => :logout
   end
+
+  match '/users/restore/:id', to: 'users#restore', :as => :users_restore
+  match '/users/obliterate/:id', to: 'users#obliterate', :as => :users_obliterate
+
+  resources :users do
+    resources :plans
+  end
+
+  resources :search, :only => [:index]
+  resources :achievements
+  resources :authentications
+  resources :likes
+  resources :tags
+  resources :categories
+  resources :flags
+
+  resources :posts do
+    member do
+      post :upvote
+      post :downvote
+    end
+
+    resources :comments do
+      member do
+        post :upvote
+        post :downvote
+      end
+    end
+  end
+
   resources :articles, :controller => "posts", :type => "Article" do
     resources :comments
   end
+
   resources :exercises, :controller => "posts", :type => "Kata" do
     resources :comments
   end
+
+  match 'katas/random', :to => 'posts#random', :type => "Kata", :as => :random_kata
+
   resources :katas, :controller => "posts", :type => "Kata" do
-    resources :reviews, :controller => "comments"
+    resources :reviews, :controller => "comments" do
+      member do
+        post :upvote
+        post :downvote
+      end
+    end
   end
 
-  match '/get_started', to: 'start#show'
+  match '/get_started', to: 'exercise_about_page#show'
   match '/auth/:provider/callback', :to => 'authentications#create'
   match '/auth/failure', :to => 'authentications#failure'
+  match '/unsubscribe/:id', :to => 'users#unsubscribe'
+  match '/popular', to: 'posts#index' , :popular => true
 
   root :to => 'posts#index'
 

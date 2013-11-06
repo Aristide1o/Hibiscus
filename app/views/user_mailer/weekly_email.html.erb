@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+</head>
+<body>
+<div>
+  <h1>Craftsmanship</h1>
+  <p>Reviewed katas for software excellence</p>
+  <img src="http://2010dev.wordpress.com/wp-content/themes/pub/twentyten/images/headers/forestfloor.jpg" width="100%" alt="">
+</div>
+<% @posts.each do | post | %>
+<div>
+  <p><a href="<%= @url %>"><%= post.title %></a>:&nbsp;
+    <%= raw strip_tags(post.content.truncate(350)) %><br/>
+  </p>
+</div>
+<% end %>
+<p>
+  To view the posts and articles just follow this link: <%= @url %>.
+</p>
+<p>Do not reply to this email.</p>
+<p>
+  To disable digest emails from Craftsmanship, just follow this link:
+  <a href="<%= @url + '/unsubscribe/' + @id %>">Unsubscribe</a>.
+</p>
+</body>
+</html>

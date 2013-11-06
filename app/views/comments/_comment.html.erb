@@ -1,14 +1,34 @@
 <section class="comment">
+
+  <div id="vote_<%= comment.id %>" class="vote">
+    <%= render :partial => 'votes/vote', :locals => {:voteable => comment} %>
+  </div>
+
   <p class="commentContent"><%= comment.content.html_safe %></p>
 
   <p class="commentEdit">
-    <span class="edit-link">
+    <% if can? :update, comment %>
+     <span class="edit-link">
         <%= link_to 'Edit', edit_polymorphic_path([@post, comment]) %>
     </span>
     <span class="edit-link">
          <%= link_to 'Delete', polymorphic_path([@post, comment]), confirm: 'Are you sure?', method: :delete %>
     </span>
+    <% end %>
+    &nbsp;<%= button_to("Report", {:controller => "flags", :post_type => 'Post', :post_id => @post.id, :comment_id => comment.id}, :confirm => "Are you sure?", :class => "reportLink") %>
   </p>
 
-  <p class="commentPoster">Posted by: <%= link_to comment.user.display_name, comment.user %></p>
+  <p class="commentPoster">
+    <% if comment.updated_at > comment.created_at %>
+        Updated on <%= comment.updated_at.to_date.to_formatted_s(:long_ordinal) %>
+    <% else %>
+        Posted on <%= comment.created_at.to_date.to_formatted_s(:long_ordinal) %>
+    <% end %>
+    by
+    <% if user_blocked(comment.user_id) %>
+      <%= comment.user_id %>
+    <% else %>
+      <%= link_to comment.user.display_name, comment.user %><b style="font-size: 1.25em; padding-left: 5px;"><%= comment.user.points %></b>
+    <% end %>
+  </p>
 </section>

@@ -21,6 +21,57 @@
   </script>
 </head>
 <body class="home blog">
+<div id="access" >
+  <div class="menu">
+
+    <ul>
+      <li ><%= link_to "Articles", root_url, :title => "Articles" %>
+        <ul>
+          <li ><%= link_to "Popular", '/popular', :title => "Popular" %> </li>
+        </ul>
+      </li>
+      <li ><%= link_to "#{GlobalConfig.activity_name.pluralize}", "/#{GlobalConfig.activity_type.pluralize}", :title => "#{GlobalConfig.activity_name.pluralize}" %>
+        <ul>
+          <li><%= link_to "Get Started", '/get_started', :title => "Get Started" %></li>
+        </ul>
+      </li>
+
+
+      <li id="search-menu">
+        <form action="<%= search_index_path %>" id="searchform" method="get" role="search">
+            <input id="search-box" type="text" id="query" name="query" value="" placeholder="Search">
+            <input id="search-box-button" type="submit" value="Search" style="visibility:hidden">
+        </form>
+
+      </li>
+
+
+
+        <% if current_user %>
+          <li id="subscribe-menu-signedin"><a href="#" title="Subscribe" onclick="javascript:showpromptdiv()"> Subscribe</a></li>
+          <li id="signed-in-user">
+            <%= link_to current_user.display_name, current_user %>
+            <ul>
+              <li id="logout_link"><%= link_to "Logout", :logout %> </li>
+            </ul>
+          </li>
+        <% else %>
+          <li id="subscribe-menu"><a href="#" title="Subscribe" onclick="javascript:showpromptdiv()"> Subscribe</a></li>
+          <li id="signed-in-with-github">
+            <img src="/images/github.png" alt="Github" id="github-image">
+            <%= link_to "Sign in with Github", '/auth/github' %>
+          </li>
+
+        <% end %>
+
+
+    </ul>
+
+
+  </div>
+
+</div>
+
 <div id="wrapper" class="hfeed">
   <div id="header">
     <div id="masthead">
@@ -30,47 +81,12 @@
         </h1>
 
         <div id="site-description"><%= GlobalConfig.site_tag %></div>
-        <img src="http://2010dev.wordpress.com/wp-content/themes/pub/twentyten/images/headers/forestfloor.jpg" width="100%" height="198" alt=""/>
+        <%= image_tag("shore_198.jpg", :size => "1080x198") %>
 
       </div>
       <!-- #branding -->
 
-      <div id="access" role="navigation">
-        <div class="skip-link screen-reader-text"><a href="#content" title="Skip to content">Skip to content</a></div>
 
-        <div class="menu">
-
-          <ul>
-            <li class="current_page_item"><%= link_to "Home", root_url, :title => "Home" %></li>
-            <li class="page_item"><%= link_to "#{GlobalConfig.activity_name.pluralize}", "/#{GlobalConfig.activity_type.pluralize}", :title => "#{GlobalConfig.activity_name.pluralize}" %></li>
-            <li class="current_page_item"><%= link_to "Popular", root_url, :title => "Popular" %></li>
-            <!--<li class="current_page_item"><%= link_to "Get Started", '/get_started', :title => "Get Started" %></li>-->
-            <li class="widget-container widget_search" id="search-2">
-              <form action="<%= search_index_path %>" id="searchform" method="get" role="search">
-                <div id="right_menu_search">
-                  <input type="text" id="query" name="query" value="">
-                  <input type="submit" value="Search" id="searchsubmit">
-                </div>
-              </form>
-
-            </li>
-            <li id="user_profile_menu">
-              <% if current_user %>
-                  <%= link_to current_user.display_name, current_user %>
-                  <ul>
-                    <li id="logout_link"><%= link_to "Logout", :logout %> </li>
-                  </ul>
-              <% else %>
-                  <%= link_to "Login", '/auth/github' %>
-              <% end %>
-
-            </li>
-          </ul>
-
-
-        </div>
-
-      </div>
       <!-- #access -->
     </div>
     <!-- #masthead -->
@@ -79,7 +95,7 @@
   <div id="main">
     <section id="container">
       <section id="content" role="main">
-
+        <h1><%=  yield :page_header %></h1>
         <div id="nav-above" class="navigation">
 
           <div class="nav-previous">
@@ -108,6 +124,8 @@
   <!-- #main -->
   <%= yield %>
 
+  <%= render partial: "posts/subscription"%>
+
   <div id="footer" role="contentinfo">
     <div id="colophon">
       <div id="site-info">
@@ -116,6 +134,10 @@
 
       </div>
       <!-- #site-info -->
+
+      <div id="rss-icon">
+        <%= link_to image_tag('rss-news.png'), root_url + "posts.rss" , :target => "_blank" %>
+      </div>
 
       <div id="site-generator">
         <a href="https://github.com/hahuang65/Hibiscus" title="Hibiscus" rel="generator">Powered by Hibiscus.</a>
